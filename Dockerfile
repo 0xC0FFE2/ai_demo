@@ -12,7 +12,7 @@ RUN apt-get update -o Acquire::Check-Valid-Until=false && \
 
 # Python 패키지 설치
 COPY requirements.txt .
-RUN pip3 install -r requirements.txt
+RUN pip3 install --no-cache-dir -r requirements.txt
 
 # 모델 다운로드 스크립트 실행
 COPY download_model.py .
