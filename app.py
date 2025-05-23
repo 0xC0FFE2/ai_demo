@@ -47,7 +47,17 @@ async def generate_text(request: TextGenerationRequest):
         
         generated_text = tokenizer.decode(outputs[0], skip_special_tokens=True)
         new_text = generated_text[len(request.prompt):].strip()
-        return {"generated_text": new_text}
+        
+        # "Answer:" 이후 첫 번째 단어/구문만 추출
+        if "Answer:" in new_text:
+            answer_part = new_text.split("Answer:")[-1].strip()
+            # 첫 번째 줄 또는 첫 번째 단어만 추출
+            first_line = answer_part.split('\n')[0].strip()
+            return {"generated_text": first_line}
+        else:
+            # 첫 번째 줄만 반환
+            first_line = new_text.split('\n')[0].strip()
+            return {"generated_text": first_line}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
