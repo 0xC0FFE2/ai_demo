@@ -46,7 +46,8 @@ async def generate_text(request: TextGenerationRequest):
             )
         
         generated_text = tokenizer.decode(outputs[0], skip_special_tokens=True)
-        return {"generated_text": generated_text}
+        new_text = generated_text[len(request.prompt):].strip()
+        return {"generated_text": new_text}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
