@@ -5,19 +5,16 @@ import torch
 
 app = FastAPI()
 
-# CPU 스레드 최적화 설정
 torch.set_num_threads(24)  # 24 vCPU 활용
 
-# 표준 모델 로드
 model_path = "./models/phi-2"
-print("모델 로드 중...")
+
 model = AutoModelForCausalLM.from_pretrained(
     model_path,
-    torch_dtype=torch.float32,  # CPU에서는 float32 사용
+    torch_dtype=torch.float32,
     device_map="auto"
 )
 tokenizer = AutoTokenizer.from_pretrained(model_path)
-print("모델 로드 완료")
 
 class TextGenerationRequest(BaseModel):
     prompt: str
@@ -48,14 +45,11 @@ async def generate_text(request: TextGenerationRequest):
         generated_text = tokenizer.decode(outputs[0], skip_special_tokens=True)
         new_text = generated_text[len(request.prompt):].strip()
         
-        # "Answer:" 이후 첫 번째 단어/구문만 추출
         if "Answer:" in new_text:
             answer_part = new_text.split("Answer:")[-1].strip()
-            # 첫 번째 줄 또는 첫 번째 단어만 추출
             first_line = answer_part.split('\n')[0].strip()
             return {"generated_text": first_line}
         else:
-            # 첫 번째 줄만 반환
             first_line = new_text.split('\n')[0].strip()
             return {"generated_text": first_line}
     except Exception as e:
